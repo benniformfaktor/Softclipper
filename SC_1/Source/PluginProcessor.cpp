@@ -19,7 +19,7 @@ SC_1AudioProcessor::SC_1AudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), apvts(*this, nullptr, "Parameters", createParameters())
 #endif
 {
 }
@@ -134,7 +134,11 @@ void SC_1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
-
+    
+    auto gain = apvts.getRawParameterValue("GAIN")->load();
+;
+   
+    
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -153,8 +157,12 @@ void SC_1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
+        
+        for(int i = 0 ; i < buffer.getNumSamples() ; ++i){
+            
+            channelData[i] *= gain;
+        }
+        
     }
 }
 
@@ -188,4 +196,14 @@ void SC_1AudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new SC_1AudioProcessor();
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout SC_1AudioProcessor::createParameters()
+{
+    std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+    
+    params.push_back (std::make_unique<juce::AudioParameterFloat>("GAIN","Gain", 0.0f, 1.0f, 1.0f));
+    
+    return { params.begin(), params.end()};
+    
 }

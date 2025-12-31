@@ -13,8 +13,15 @@
 SC_1AudioProcessorEditor::SC_1AudioProcessorEditor (SC_1AudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+    
+    gainSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
+    gainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 50);
+    addAndMakeVisible(gainSlider);
+    
+    gainSliderAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "GAIN", gainSlider);
+    
+    
+    
     setSize (400, 300);
 }
 
@@ -30,11 +37,10 @@ void SC_1AudioProcessorEditor::paint (juce::Graphics& g)
 
     g.setColour (juce::Colours::white);
     g.setFont (juce::FontOptions (15.0f));
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    
 }
 
 void SC_1AudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    gainSlider.setBounds (getWidth() / 2 - 100, getHeight() / 2 - 50, 200, 100);
 }
